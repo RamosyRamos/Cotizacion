@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taller Ramos y Ramos — Redireccionando...</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f0f0f;
+      font-family: system-ui, sans-serif;
+      color: #ccc;
+      text-align: center;
+    }
+    .logo { font-size: 2rem; margin-bottom: 12px; }
+    p { font-size: 14px; color: #666; }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="logo">🔧</div>
+    <p>Cargando tu cotización...</p>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const k = params.get('k');
+    if (k) {
+      window.location.replace(
+        'https://ramosyramos.github.io/Cotizacion/cliente.html?data=' + k
+      );
+    } else {
+      document.body.innerHTML = '<div><div style="font-size:2rem">⚠️</div><p>Link inválido o expirado.</p></div>';
+    }
+  </script>
+</body>
+</html>
