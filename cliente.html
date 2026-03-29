@@ -411,18 +411,7 @@ function iniciar(payload) {
 
       // 2. Crear la tarjeta
       const cardName = `${cliente.nombre}${cliente.vehiculo ? ' — ' + cliente.vehiculo : ''} | ${cliente.orden || ''}`;
-      let desc = `**Cotización aprobada por el cliente**\n`;
-      desc += `📋 N°: ${cliente.orden || '—'}\n`;
-      desc += `👤 Cliente: ${cliente.nombre}\n`;
-      if (cliente.vehiculo) desc += `🚗 Vehículo: ${cliente.vehiculo}\n\n`;
-      aprobados.forEach(({r, oi}) => {
-        const op = r.opciones[oi];
-        desc += `• **${r.nombre}** — ${op.calidad} / ${op.estado}`;
-        if (op.marca) desc += ` · ${op.marca}`;
-        if (op.garantia) desc += ` · 🛡️ ${op.garantia}`;
-        desc += ` → ${fCRC(op.precioFinalCRC)}\n`;
-      });
-      desc += `\n💰 **Total aprobado: ${fCRC(total)}**`;
+      let desc = cliente.nombre;
 
       const cardRes = await fetch(
         `https://api.trello.com/1/cards?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`, {
