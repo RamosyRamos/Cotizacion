@@ -43,7 +43,7 @@
       const esOrden = /^OT-\d{6}-\d{3,}$/.test(k);
 
       if (esOrden) {
-        const jsonUrl = 'https://ramosyramos.github.io/Cotizacion/data/' + k + '.json';
+        const jsonUrl = 'https://raw.githubusercontent.com/ramosyramos/Cotizacion/main/data/' + k + '.json';
         const MAX_INTENTOS = 10;
         const ESPERA_MS    = 5000; // 5 segundos entre intentos
 
@@ -87,6 +87,4 @@
     }
 
     cargar();
-  </script>
-</body>
-</html>
+  </sc
