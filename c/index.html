@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Taller Ramos y Ramos — Redireccionando...</title>
+  <title>Taller Ramos y Ramos — Cargando cotización...</title>
   <style>
     body {
       margin: 0;
@@ -16,25 +16,59 @@
       color: #ccc;
       text-align: center;
     }
-    .logo { font-size: 2rem; margin-bottom: 12px; }
-    p { font-size: 14px; color: #666; }
+    .logo { font-size: 2.5rem; margin-bottom: 12px; }
+    .msg  { font-size: 14px; color: #666; margin-top: 8px; }
+    .err  { color: #e74c3c; }
   </style>
 </head>
 <body>
   <div>
     <div class="logo">🔧</div>
-    <p>Cargando tu cotización...</p>
+    <div id="msg" class="msg">Cargando tu cotización...</div>
   </div>
   <script>
     const params = new URLSearchParams(window.location.search);
     const k = params.get('k');
-    if (k) {
-      window.location.replace(
-        'https://ramosyramos.github.io/Cotizacion/cliente.html?data=' + k
-      );
-    } else {
-      document.body.innerHTML = '<div><div style="font-size:2rem">⚠️</div><p>Link inválido o expirado.</p></div>';
+
+    function mostrarError(txt) {
+      document.getElementById('msg').innerHTML = '<span class="err">' + txt + '</span>';
     }
+
+    async function cargar() {
+      if (!k) { mostrarError('Link inválido o expirado.'); return; }
+
+      // Detectar si es un código de orden (OT-YYMMDD-NNN) o base64 antiguo
+      const esOrden = /^OT-\d{6}-\d{3,}$/.test(k);
+
+      if (esOrden) {
+        // Nuevo formato: buscar JSON en GitHub Pages
+        const jsonUrl = 'https://ramosyramos.github.io/Cotizacion/data/' + k + '.json';
+        try {
+          document.getElementById('msg').textContent = 'Obteniendo cotización...';
+          const res = await fetch(jsonUrl);
+          if (!res.ok) throw new Error('No encontrado');
+          const payload = await res.json();
+          const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
+          window.location.replace(
+            'https://ramosyramos.github.io/Cotizacion/cliente.html?data=' + encoded
+          );
+        } catch(e) {
+          mostrarError('No se encontró la cotización. Puede que el link haya expirado o sea incorrecto.');
+        }
+      } else {
+        // Formato antiguo: k es el payload base64 directamente
+        try {
+          JSON.parse(decodeURIComponent(atob(k)));
+          window.location.replace(
+            'https://ramosyramos.github.io/Cotizacion/cliente.html?data=' + k
+          );
+        } catch(e) {
+          mostrarError('Link inválido o expirado.');
+        }
+      }
+    }
+
+    cargar();
   </script>
 </body>
 </html>
