@@ -303,11 +303,72 @@ function iniciar(payload) {
           <span>Total aprobado</span>
           <span class="monto-total">${fCRC(total)}</span>
         </div>
+        <div class="resumen-total" style="margin-top:10px;background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.25);flex-direction:column;align-items:flex-start;gap:4px;">
+          <span style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">Adelanto requerido (50%)</span>
+          <span class="monto-total" style="font-size:24px;">${fCRC(Math.round(total * 0.5))}</span>
+        </div>
         <div class="row" style="margin-top:18px;">
           <button class="btn btn-wa" onclick="enviarWhatsApp()">
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.524 5.847L0 24l6.302-1.502A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.36-.213-3.733.89.923-3.636-.234-.374A9.818 9.818 0 1112 21.818z"/></svg>
             Confirmar y enviar al taller
           </button>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:22px;margin-top:16px;">
+        <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1.5px;color:var(--rojo);margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+          <span style="display:inline-block;width:3px;height:16px;background:var(--rojo);border-radius:2px;"></span>
+          Instrucciones de pago
+        </div>
+
+        <div style="background:var(--rojo-glow);border:1px solid rgba(204,0,0,0.25);border-radius:10px;padding:14px;margin-bottom:16px;font-size:14px;line-height:1.6;">
+          Para proceder con el pedido se requiere el <strong>50% del costo</strong> de los repuestos como adelanto.<br>
+          El adelanto o cancelación total se puede realizar por <strong>transferencia, SINPE o efectivo</strong>, y con <strong>tarjeta de crédito</strong> en días hábiles en nuestro establecimiento.
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">🏦 Cuenta BAC Colones</div>
+            <div style="font-size:13px;line-height:1.8;color:var(--texto);">
+              <div><span style="color:var(--muted);">Cliente:</span> Gustavo Adolfo Ramos Fallas</div>
+              <div><span style="color:var(--muted);">N° cuenta:</span> <strong>935377267</strong></div>
+              <div><span style="color:var(--muted);">IBAN:</span> <strong>CR82010200009353772678</strong></div>
+            </div>
+          </div>
+          <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">💵 Cuenta BAC Dólares</div>
+            <div style="font-size:13px;line-height:1.8;color:var(--texto);">
+              <div><span style="color:var(--muted);">Cliente:</span> Gustavo Adolfo Ramos Fallas</div>
+              <div><span style="color:var(--muted);">N° cuenta:</span> <strong>940809213</strong></div>
+              <div><span style="color:var(--muted);">IBAN:</span> <strong>CR69010200009408092136</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+          <div style="font-size:28px;">📱</div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">SINPE Móvil</div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:26px;letter-spacing:2px;color:var(--success);">8343-9257</div>
+          </div>
+        </div>
+
+        <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">⏱️ Tiempos estimados de entrega</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+              <span style="font-size:18px;">🇺🇸</span>
+              <div><strong>Estados Unidos</strong> — 7 a 10 días hábiles</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+              <span style="font-size:18px;">🇪🇺</span>
+              <div><strong>Europa</strong> — 10 a 20 días hábiles</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--borde);font-size:12px;color:var(--muted);">
+            📦 Los pedidos se realizan los fines de semana.<br>
+            ⚠️ El costo de los repuestos no incluye IVA.
+          </div>
         </div>
       </div>`;
 
@@ -384,7 +445,7 @@ function iniciar(payload) {
       // 4. Agregar cada repuesto como ítem del checklist
       for (const {r, oi} of aprobados) {
         const op = r.opciones[oi];
-        const itemName = `${r.nombre} | ${op.calidad} / ${op.estado}${op.marca?' · '+op.marca:''} | ${fCRC(op.precioFinalCRC)}`;
+        const itemName = `${r.nombre}${r._np ? ' [' + r._np + ']' : ''} | ${op.calidad} / ${op.estado}${op.marca?' · '+op.marca:''} | ${fCRC(op.precioFinalCRC)}`;
         await fetch(
           `https://api.trello.com/1/checklists/${checklist.id}/checkItems?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`, {
           method: 'POST',
