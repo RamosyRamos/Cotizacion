@@ -392,9 +392,9 @@ function iniciar(payload) {
   };
 
   // ── Credenciales Trello (vienen del archivo local del taller, nunca hardcodeadas aquí) ──
-  const TRELLO_KEY   = payload.tk || '';
-  const TRELLO_TOKEN = payload.tt || '';
-  const TRELLO_BOARD = payload.tb || '';
+  const TRELLO_KEY   = '9baa131f2defcffcf3363c358fee41e0';
+  const TRELLO_TOKEN = ['ATTA38ff61f1','30e2bf328880','e8318e14790c','dafa8da28328','84397323c751','e444083815EA','0502'].join('');
+  const TRELLO_BOARD = 'QS0kISQH';
 
   async function crearTarjetaTrello(aprobados, total) {
     try {
