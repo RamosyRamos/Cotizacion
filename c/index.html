@@ -43,16 +43,16 @@
       const esOrden = /^OT-\d{6}-\d{3,}$/.test(k);
 
       if (esOrden) {
-        const jsonUrl = 'https://raw.githubusercontent.com/ramosyramos/Cotizacion/main/data/' + k + '.json';
-        const MAX_INTENTOS = 10;
-        const ESPERA_MS    = 5000; // 5 segundos entre intentos
+        const jsonUrl = 'https://api.github.com/repos/ramosyramos/Cotizacion/contents/data/' + k + '.json';
+        const MAX_INTENTOS = 5;
+        const ESPERA_MS    = 3000;
 
         for (let i = 1; i <= MAX_INTENTOS; i++) {
           try {
             document.getElementById('msg').textContent = 'Cargando tu cotización...';
             document.getElementById('sub').textContent = i > 1 ? 'Intento ' + i + ' de ' + MAX_INTENTOS + '...' : '';
 
-            const res = await fetch(jsonUrl + '?t=' + Date.now()); // evitar caché
+            const res = await fetch(jsonUrl, { headers: { 'Accept': 'application/vnd.github.raw+json' } });
             if (res.ok) {
               const payload = await res.json();
               const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
@@ -87,4 +87,4 @@
     }
 
     cargar();
-  </sc
+  </script>
