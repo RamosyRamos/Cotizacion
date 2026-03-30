@@ -195,6 +195,15 @@ function fCRC(n) {
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+function copiarTexto(txt, btn) {
+  navigator.clipboard.writeText(txt).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅';
+    btn.style.color = '#2ecc71';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500);
+  });
+}
+
 function snack(msg, ok=true) {
   const el = document.getElementById('snackbar');
   el.textContent = msg;
@@ -331,25 +340,40 @@ function iniciar(payload) {
             <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">🏦 Cuenta BAC Colones</div>
             <div style="font-size:13px;line-height:1.8;color:var(--texto);">
               <div><span style="color:var(--muted);">Cliente:</span> Gustavo Adolfo Ramos Fallas</div>
-              <div><span style="color:var(--muted);">N° cuenta:</span> <strong>935377267</strong></div>
-              <div><span style="color:var(--muted);">IBAN:</span> <strong>CR82010200009353772678</strong></div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="color:var(--muted);">N° cuenta:</span> <strong>935377267</strong>
+                <button onclick="copiarTexto('935377267', this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--muted);cursor:pointer;">📋</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="color:var(--muted);">IBAN:</span> <strong>CR82010200009353772678</strong>
+                <button onclick="copiarTexto('CR82010200009353772678', this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--muted);cursor:pointer;">📋</button>
+              </div>
             </div>
           </div>
           <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;">
             <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">💵 Cuenta BAC Dólares</div>
             <div style="font-size:13px;line-height:1.8;color:var(--texto);">
               <div><span style="color:var(--muted);">Cliente:</span> Gustavo Adolfo Ramos Fallas</div>
-              <div><span style="color:var(--muted);">N° cuenta:</span> <strong>940809213</strong></div>
-              <div><span style="color:var(--muted);">IBAN:</span> <strong>CR69010200009408092136</strong></div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="color:var(--muted);">N° cuenta:</span> <strong>940809213</strong>
+                <button onclick="copiarTexto('940809213', this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--muted);cursor:pointer;">📋</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="color:var(--muted);">IBAN:</span> <strong>CR69010200009408092136</strong>
+                <button onclick="copiarTexto('CR69010200009408092136', this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--muted);cursor:pointer;">📋</button>
+              </div>
             </div>
           </div>
         </div>
 
         <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
           <div style="font-size:28px;">📱</div>
-          <div>
+          <div style="flex:1;">
             <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">SINPE Móvil</div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:26px;letter-spacing:2px;color:var(--success);">8343-9257</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="font-family:'Bebas Neue',cursive;font-size:26px;letter-spacing:2px;color:var(--success);">8343-9257</div>
+              <button onclick="copiarTexto('83439257', this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--muted);cursor:pointer;">📋</button>
+            </div>
           </div>
         </div>
 
@@ -436,57 +460,4 @@ function iniciar(payload) {
         const op = r.opciones[oi];
         const itemName = `${r.nombre}${r._np ? ' [' + r._np + ']' : ''} | ${op.calidad} / ${op.estado}${op.marca?' · '+op.marca:''} | ${fCRC(op.precioFinalCRC)}`;
         await fetch(
-          `https://api.trello.com/1/checklists/${checklist.id}/checkItems?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: itemName })
-        });
-      }
-
-      return { ok: true, cardUrl: card.shortUrl };
-    } catch(e) {
-      return { ok: false, error: e.message };
-    }
-  }
-
-  window.enviarWhatsApp = async function() {
-    const aprobados = window._aprobados;
-    const total     = window._total;
-    const btn = document.querySelector('.btn-wa');
-    if (btn) { btn.textContent = '⏳ Procesando...'; btn.disabled = true; }
-
-    // Crear tarjeta en Trello
-    const trello = await crearTarjetaTrello(aprobados, total);
-
-    // Mensaje WhatsApp
-    let msg = `✅ *Aprobación de cotización – Taller Ramos y Ramos*\n`;
-    msg += `📋 N°: ${cliente.orden || '—'}\n`;
-    msg += `👤 Cliente: ${cliente.nombre}\n`;
-    if (cliente.vehiculo) msg += `🚗 Vehículo: ${cliente.vehiculo}\n`;
-    msg += `\n*Repuestos aprobados:*\n`;
-    aprobados.forEach(({r, oi}) => {
-      const op = r.opciones[oi];
-      msg += `• ${r.nombre}\n`;
-      msg += `  → ${op.calidad} / ${op.estado}${op.marca ? ' · ' + op.marca : ''}\n`;
-      if (op.garantia) msg += `  → 🛡️ ${op.garantia}\n`;
-      msg += `  → ${fCRC(op.precioFinalCRC)}\n`;
-    });
-    msg += `\n💰 *Total aprobado: ${fCRC(total)}*\n`;
-    if (trello.ok) msg += `\n🗂️ Tarjeta creada en Trello ✅`;
-    msg += `\n_Enviado desde el formulario de aprobación Taller Ramos y Ramos_`;
-
-    if (trello.ok) {
-      snack('✅ Tarjeta creada en Trello correctamente.');
-    } else {
-      snack('⚠️ WhatsApp enviado pero Trello falló: ' + trello.error, false);
-    }
-
-    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-    if (btn) { btn.textContent = '✅ Confirmado'; btn.disabled = true; }
-  };
-
-  render();
-}
-</script>
-</body>
-</html>
+          `https://api.trello.com/1/checklists/${checklist.id}/che
