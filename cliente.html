@@ -340,7 +340,7 @@ function iniciar(payload) {
             <label class="opcion-cliente ${selIdx === oi ? 'seleccionada' : ''}" onclick="seleccionar(${ri},${oi})">
               <div class="radio-dot"></div>
               <div class="opcion-cliente-info">
-                <div class="opcion-cliente-titulo">${esc(op.calidad)} · ${esc(op.estado)}${op.marca ? ' · ' + esc(op.marca) : ''}</div>
+                <div class="opcion-cliente-titulo">${esc(op.calidad)} · ${esc(op.estado)}${op.marca ? ' · ' + esc(op.marca) : ''} · ${op.origen === 'europa' ? '🇪🇺 Europa' : '🇺🇸 USA'}</div>
                 <div class="opcion-cliente-meta">${op.garantia ? '🛡️ Garantía: ' + esc(op.garantia) : 'Sin garantía especificada'}</div>
               </div>
               <div class="opcion-cliente-precio">${fCRC(op.precioFinalCRC)}</div>
