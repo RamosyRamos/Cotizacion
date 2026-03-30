@@ -240,6 +240,75 @@ function iniciar(payload) {
   const { taller, cliente, repuestos: reps } = payload;
   const sel = new Array(reps.length).fill(null);
 
+  const pagoHTML = `
+  <div style="background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:22px;margin-top:16px;">
+    <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1.5px;color:var(--rojo);margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-block;width:3px;height:16px;background:var(--rojo);border-radius:2px;"></span>
+      Instrucciones de pago
+    </div>
+    <div style="background:var(--rojo-glow);border:1px solid rgba(204,0,0,0.25);border-radius:10px;padding:14px;margin-bottom:16px;font-size:14px;line-height:1.6;">
+      Para proceder con el pedido se requiere el <strong>50% del costo</strong> de los repuestos como adelanto.<br>
+      El adelanto o cancelación total se puede realizar por <strong>transferencia, SINPE o efectivo</strong>, y con <strong>tarjeta de crédito</strong> en días hábiles en nuestro establecimiento.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">🏦 Cuenta BAC Colones</div>
+        <div style="font-size:13px;line-height:2;color:var(--texto);">
+          <div><span style="color:var(--muted);">Cliente:</span> Gustavo Adolfo Ramos Fallas</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="color:var(--muted);">N° cuenta:</span> <strong>935377267</strong>
+            <button onclick="copiarTexto('935377267', this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted);cursor:pointer;">📋</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="color:var(--muted);">IBAN:</span> <strong>CR82010200009353772678</strong>
+            <button onclick="copiarTexto('CR82010200009353772678', this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted);cursor:pointer;">📋</button>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">💵 Cuenta BAC Dólares</div>
+        <div style="font-size:13px;line-height:2;color:var(--texto);">
+          <div><span style="color:var(--muted);">Cliente:</span> Gustavo Adolfo Ramos Fallas</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="color:var(--muted);">N° cuenta:</span> <strong>940809213</strong>
+            <button onclick="copiarTexto('940809213', this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted);cursor:pointer;">📋</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="color:var(--muted);">IBAN:</span> <strong>CR69010200009408092136</strong>
+            <button onclick="copiarTexto('CR69010200009408092136', this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted);cursor:pointer;">📋</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+      <div style="font-size:28px;">📱</div>
+      <div style="flex:1;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">SINPE Móvil</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-family:'Bebas Neue',cursive;font-size:26px;letter-spacing:2px;color:var(--success);">8343-9257</div>
+          <button onclick="copiarTexto('83439257', this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted);cursor:pointer;">📋</button>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">⏱️ Tiempos estimados de entrega</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+          <span style="font-size:18px;">🇺🇸</span>
+          <div><strong>Estados Unidos</strong> — 7 a 10 días hábiles</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+          <span style="font-size:18px;">🇪🇺</span>
+          <div><strong>Europa</strong> — 10 a 20 días hábiles</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--borde);font-size:12px;color:var(--muted);">
+        📦 Los pedidos se realizan los fines de semana.<br>
+        ⚠️ El costo de los repuestos no incluye IVA.
+      </div>
+    </div>
+  </div>`;
+
   function render() {
     const hero = `
     <div class="cliente-hero">
@@ -322,78 +391,6 @@ function iniciar(payload) {
             Confirmar y enviar al taller
           </button>
         </div>
-      </div>
-
-      <div style="background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:22px;margin-top:16px;">
-        <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1.5px;color:var(--rojo);margin-bottom:16px;display:flex;align-items:center;gap:8px;">
-          <span style="display:inline-block;width:3px;height:16px;background:var(--rojo);border-radius:2px;"></span>
-          Instrucciones de pago
-        </div>
-
-        <div style="background:var(--rojo-glow);border:1px solid rgba(204,0,0,0.25);border-radius:10px;padding:14px;margin-bottom:16px;font-size:14px;line-height:1.6;">
-          Para proceder con el pedido se requiere el <strong>50% del costo</strong> de los repuestos como adelanto.<br>
-          El adelanto o cancelación total se puede realizar por <strong>transferencia, SINPE o efectivo</strong>, y con <strong>tarjeta de crédito</strong> en días hábiles en nuestro establecimiento.
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-          <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">🏦 Cuenta BAC Colones</div>
-            <div style="font-size:13px;line-height:1.8;color:var(--texto);">
-              <div><span style="color:var(--muted);">Cliente:</span> Gustavo Adolfo Ramos Fallas</div>
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="color:var(--muted);">N° cuenta:</span> <strong>935377267</strong>
-                <button onclick="copiarTexto(&apos;935377267&apos;, this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--muted);cursor:pointer;">📋</button>
-              </div>
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="color:var(--muted);">IBAN:</span> <strong>CR82010200009353772678</strong>
-                <button onclick="copiarTexto(&apos;CR82010200009353772678&apos;, this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--muted);cursor:pointer;">📋</button>
-              </div>
-            </div>
-          </div>
-          <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">💵 Cuenta BAC Dólares</div>
-            <div style="font-size:13px;line-height:1.8;color:var(--texto);">
-              <div><span style="color:var(--muted);">Cliente:</span> Gustavo Adolfo Ramos Fallas</div>
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="color:var(--muted);">N° cuenta:</span> <strong>940809213</strong>
-                <button onclick="copiarTexto(&apos;940809213&apos;, this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--muted);cursor:pointer;">📋</button>
-              </div>
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="color:var(--muted);">IBAN:</span> <strong>CR69010200009408092136</strong>
-                <button onclick="copiarTexto(&apos;CR69010200009408092136&apos;, this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--muted);cursor:pointer;">📋</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
-          <div style="font-size:28px;">📱</div>
-          <div style="flex:1;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">SINPE Móvil</div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div style="font-family:'Bebas Neue',cursive;font-size:26px;letter-spacing:2px;color:var(--success);">8343-9257</div>
-              <button onclick="copiarTexto(&apos;83439257&apos;, this)" style="background:none;border:1px solid var(--borde);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--muted);cursor:pointer;">📋</button>
-            </div>
-          </div>
-        </div>
-
-        <div style="background:var(--card2);border:1px solid var(--borde);border-radius:10px;padding:14px;">
-          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">⏱️ Tiempos estimados de entrega</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
-              <span style="font-size:18px;">🇺🇸</span>
-              <div><strong>Estados Unidos</strong> — 7 a 10 días hábiles</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
-              <span style="font-size:18px;">🇪🇺</span>
-              <div><strong>Europa</strong> — 10 a 20 días hábiles</div>
-            </div>
-          </div>
-          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--borde);font-size:12px;color:var(--muted);">
-            📦 Los pedidos se realizan los fines de semana.<br>
-            ⚠️ El costo de los repuestos no incluye IVA.
-          </div>
-        </div>
       </div>`;
 
       // Guardar para envío
@@ -407,7 +404,7 @@ function iniciar(payload) {
       </div>`;
     }
 
-    document.getElementById('appRoot').innerHTML = hero + instrucciones + repsHTML + resumenHTML;
+    document.getElementById('appRoot').innerHTML = hero + instrucciones + repsHTML + resumenHTML + pagoHTML;
   }
 
   window.seleccionar = function(ri, oi) {
