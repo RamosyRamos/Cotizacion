@@ -6,15 +6,10 @@
   <title>Taller Ramos y Ramos — Cargando cotización...</title>
   <style>
     body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #0f0f0f;
-      font-family: system-ui, sans-serif;
-      color: #ccc;
-      text-align: center;
+      margin: 0; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: #0f0f0f; font-family: system-ui, sans-serif;
+      color: #ccc; text-align: center;
     }
     .logo { font-size: 2.5rem; margin-bottom: 12px; }
     .msg  { font-size: 14px; color: #666; margin-top: 8px; }
@@ -45,7 +40,7 @@
       if (esOrden) {
         const jsonUrl = 'https://api.github.com/repos/ramosyramos/Cotizacion/contents/data/' + k + '.json';
         const MAX_INTENTOS = 5;
-        const ESPERA_MS    = 3000;
+        const ESPERA_MS = 3000;
 
         for (let i = 1; i <= MAX_INTENTOS; i++) {
           try {
@@ -55,31 +50,26 @@
             const res = await fetch(jsonUrl, { headers: { 'Accept': 'application/vnd.github.raw+json' } });
             if (res.ok) {
               const payload = await res.json();
-              const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
-              window.location.replace(
-                'https://ramosyramos.github.io/Cotizacion/cliente.html?data=' + encoded
-              );
+              // Guardar en sessionStorage para evitar URL larga
+              sessionStorage.setItem('ryr_payload', JSON.stringify(payload));
+              window.location.replace('https://ramosyramos.github.io/Cotizacion/cliente.html?from=session');
               return;
             }
           } catch(e) {}
 
           if (i < MAX_INTENTOS) {
-            // Esperar antes del siguiente intento con cuenta regresiva
             for (let s = Math.round(ESPERA_MS / 1000); s > 0; s--) {
               document.getElementById('sub').textContent = 'Reintentando en ' + s + 's... (' + i + '/' + MAX_INTENTOS + ')';
               await new Promise(r => setTimeout(r, 1000));
             }
           }
         }
-
         mostrarError('No se pudo cargar la cotización. Pedile al taller que te reenvíe el link.');
       } else {
-        // Formato base64 directo
+        // Formato base64 directo (legacy)
         try {
           JSON.parse(decodeURIComponent(atob(k)));
-          window.location.replace(
-            'https://ramosyramos.github.io/Cotizacion/cliente.html?data=' + k
-          );
+          window.location.replace('https://ramosyramos.github.io/Cotizacion/cliente.html?data=' + k);
         } catch(e) {
           mostrarError('Link inválido o expirado.');
         }
@@ -88,3 +78,5 @@
 
     cargar();
   </script>
+</body>
+</html>
