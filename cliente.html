@@ -214,26 +214,33 @@ function snack(msg, ok=true) {
 
 // ── Leer datos del link ──
 const params = new URLSearchParams(location.search);
-if (!params.has('data')) {
+
+let payload = null;
+
+if (params.get('from') === 'session') {
+  // Nuevo formato: payload en sessionStorage
+  try {
+    const raw = sessionStorage.getItem('ryr_payload');
+    if (raw) {
+      payload = JSON.parse(raw);
+      sessionStorage.removeItem('ryr_payload');
+    }
+  } catch(e) {}
+} else if (params.has('data')) {
+  // Formato legacy: payload en URL
+  try {
+    payload = JSON.parse(decodeURIComponent(atob(params.get('data'))));
+  } catch(e) {}
+}
+
+if (payload) {
+  iniciar(payload);
+} else {
   document.getElementById('appRoot').innerHTML = `
     <div class="empty">
       <div class="icon">⚠️</div>
-      <p>Link inválido.<br>Pedile a tu taller que te reenvíe el link de cotización.</p>
+      <p>Link inválido o expirado.<br>Pedile a tu taller que te reenvíe el link.</p>
     </div>`;
-} else {
-  let payload;
-  try {
-    payload = JSON.parse(decodeURIComponent(atob(params.get('data'))));
-  } catch(e) {
-    document.getElementById('appRoot').innerHTML = `
-      <div class="empty">
-        <div class="icon">⚠️</div>
-        <p>Link inválido o expirado.<br>Pedile a tu taller que te reenvíe el link.</p>
-      </div>`;
-    payload = null;
-  }
-
-  if (payload) iniciar(payload);
 }
 
 function iniciar(payload) {
