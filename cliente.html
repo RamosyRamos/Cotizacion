@@ -443,6 +443,23 @@ function iniciar(payload) {
           body: JSON.stringify({ idList: lista.id })
         });
         if (!res.ok) throw new Error('No se pudo mover la tarjeta');
+
+        // Agregar checklist con repuestos aprobados
+        const clRes = await fetch(`https://api.trello.com/1/checklists?key=${TK}&token=${TT}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idCard: payload.trelloCardId, name: 'Repuestos aprobados por cliente' })
+        });
+        const checklist = await clRes.json();
+        for (const {r, oi} of aprobados) {
+          const op = r.opciones[oi];
+          const itemName = `${r.nombre}${r._np ? ' ['+r._np+']' : ''} | ${op.calidad} / ${op.estado}${op.marca?' · '+op.marca:''} | ${fCRC(op.precioFinalCRC)}`;
+          await fetch(`https://api.trello.com/1/checklists/${checklist.id}/checkItems?key=${TK}&token=${TT}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: itemName })
+          });
+        }
       } else {
         // Fallback: crear tarjeta nueva
         const cardName = `${cliente.nombre}${cliente.vehiculo ? ' — ' + cliente.vehiculo : ''}${cliente.orden ? ' · ' + cliente.orden : ''}`;
