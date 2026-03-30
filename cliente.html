@@ -386,11 +386,12 @@ function iniciar(payload) {
           <span class="monto-total" style="font-size:24px;">${fCRC(Math.round(total * 0.5))}</span>
         </div>
         <div class="row" style="margin-top:18px;">
-          <button class="btn btn-wa" onclick="enviarWhatsApp()">
+          <button class="btn btn-wa" id="btnConfirmar" onclick="confirmarAprobacion()">
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.524 5.847L0 24l6.302-1.502A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.36-.213-3.733.89.923-3.636-.234-.374A9.818 9.818 0 1112 21.818z"/></svg>
             Confirmar y enviar al taller
           </button>
         </div>
+        <div id="confirmStatus" style="margin-top:10px;"></div>
       </div>`;
 
       // Guardar para envío
@@ -412,74 +413,55 @@ function iniciar(payload) {
     render();
   };
 
-  // ── Credenciales Trello (vienen del archivo local del taller, nunca hardcodeadas aquí) ──
-  const TRELLO_KEY   = '9baa131f2defcffcf3363c358fee41e0';
-  const TRELLO_TOKEN = ['ATTA38ff61f1','30e2bf328880','e8318e14790c','dafa8da28328','84397323c751','e444083815EA','0502'].join('');
-  const TRELLO_BOARD = 'QS0kISQH';
+  const TK = '9baa131f2defcffcf3363c358fee41e0';
+  const TT = ['ATTA38ff61f1','30e2bf328880','e8318e14790c','dafa8da28328','84397323c751','e444083815EA','0502'].join('');
+  const TB = 'QS0kISQH';
 
-  async function crearTarjetaTrello(aprobados, total) {
+  window.confirmarAprobacion = async function() {
+    const aprobados = reps.map((r,ri) => ({r, oi: sel[ri]})).filter(x => x.oi >= 0);
+    const total = aprobados.reduce((sum,x) => sum + x.r.opciones[x.oi].precioFinalCRC, 0);
+
+    const btn = document.getElementById('btnConfirmar');
+    const status = document.getElementById('confirmStatus');
+    if (btn) btn.disabled = true;
+    if (status) status.innerHTML = `<p style="color:var(--muted);font-size:13px;">⏳ Actualizando Trello...</p>`;
+
+    let trelloOk = false;
     try {
-      // 1. Buscar la lista "Pendiente de pedir"
-      const listsRes = await fetch(
-        `https://api.trello.com/1/boards/${TRELLO_BOARD}/lists?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`
-      );
+      const listsRes = await fetch(`https://api.trello.com/1/boards/${TB}/lists?key=${TK}&token=${TT}`);
       const lists = await listsRes.json();
       const lista = lists.find(l =>
-        l.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-          .includes('pendiente')
+        l.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes('pendientes de pedir')
       );
-      if (!lista) throw new Error('No se encontró la lista "Pendiente de pedir"');
+      if (!lista) throw new Error('No se encontró "Pendientes de pedir" en Trello');
 
-      // 2. Crear la tarjeta
-      const cardName = `${cliente.nombre}${cliente.vehiculo ? ' — ' + cliente.vehiculo : ''} | ${cliente.orden || ''}`;
-      let desc = cliente.nombre;
-
-      const cardRes = await fetch(
-        `https://api.trello.com/1/cards?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idList: lista.id, name: cardName, desc })
-      });
-      const card = await cardRes.json();
-      if (!card.id) throw new Error('No se pudo crear la tarjeta');
-
-      // 3. Crear checklist con los repuestos aprobados
-      const clRes = await fetch(
-        `https://api.trello.com/1/checklists?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idCard: card.id, name: 'Repuestos aprobados' })
-      });
-      const checklist = await clRes.json();
-
-      // 4. Agregar cada repuesto como ítem del checklist
-      for (const {r, oi} of aprobados) {
-        const op = r.opciones[oi];
-        const itemName = `${r.nombre}${r._np ? ' [' + r._np + ']' : ''} | ${op.calidad} / ${op.estado}${op.marca?' · '+op.marca:''} | ${fCRC(op.precioFinalCRC)}`;
-        await fetch(
-          `https://api.trello.com/1/checklists/${checklist.id}/checkItems?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`, {
+      if (payload.trelloCardId) {
+        // Mover tarjeta existente
+        const res = await fetch(`https://api.trello.com/1/cards/${payload.trelloCardId}?key=${TK}&token=${TT}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idList: lista.id })
+        });
+        if (!res.ok) throw new Error('No se pudo mover la tarjeta');
+      } else {
+        // Fallback: crear tarjeta nueva
+        const cardName = `${cliente.nombre}${cliente.vehiculo ? ' — ' + cliente.vehiculo : ''}${cliente.orden ? ' · ' + cliente.orden : ''}`;
+        const cardRes = await fetch(`https://api.trello.com/1/cards?key=${TK}&token=${TT}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: itemName })
+          body: JSON.stringify({ idList: lista.id, name: cardName })
         });
+        if (!(await cardRes.json()).id) throw new Error('No se pudo crear tarjeta');
       }
 
-      return { ok: true, cardUrl: card.shortUrl };
+      trelloOk = true;
+      if (status) status.innerHTML = `<p style="color:#2ecc71;font-size:13px;">✅ Tarjeta movida a "Pendientes de pedir".</p>`;
     } catch(e) {
-      return { ok: false, error: e.message };
+      if (status) status.innerHTML = `<p style="color:#e74c3c;font-size:13px;">⚠️ Error Trello: ${e.message}</p>`;
+      if (btn) btn.disabled = false;
     }
-  }
 
-  window.enviarWhatsApp = async function() {
-    const aprobados = window._aprobados;
-    const total     = window._total;
-    const btn = document.querySelector('.btn-wa');
-    if (btn) { btn.textContent = '⏳ Procesando...'; btn.disabled = true; }
-
-    // Crear tarjeta en Trello
-    const trello = await crearTarjetaTrello(aprobados, total);
-
-    // Mensaje WhatsApp
+    // Abrir WhatsApp
     let msg = `✅ *Aprobación de cotización – Taller Ramos y Ramos*\n`;
     msg += `📋 N°: ${cliente.orden || '—'}\n`;
     msg += `👤 Cliente: ${cliente.nombre}\n`;
@@ -493,17 +475,9 @@ function iniciar(payload) {
       msg += `  → ${fCRC(op.precioFinalCRC)}\n`;
     });
     msg += `\n💰 *Total aprobado: ${fCRC(total)}*\n`;
-    if (trello.ok) msg += `\n🗂️ Tarjeta creada en Trello ✅`;
+    if (trelloOk) msg += `\n🗂️ Tarjeta actualizada en Trello ✅`;
     msg += `\n_Enviado desde el formulario de aprobación Taller Ramos y Ramos_`;
-
-    if (trello.ok) {
-      snack('✅ Tarjeta creada en Trello correctamente.');
-    } else {
-      snack('⚠️ WhatsApp enviado pero Trello falló: ' + trello.error, false);
-    }
-
     window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-    if (btn) { btn.textContent = '✅ Confirmado'; btn.disabled = true; }
   };
 
   render();
