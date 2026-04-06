@@ -525,7 +525,7 @@ function iniciar(payload) {
           `*Repuestos aprobados:*\n` +
           aprobados.map(({r, oi}) => {
             const op = r.opciones[oi];
-            return `• ${r.nombre}${r._np ? ' ['+r._np+']' : ''}\n  → ${op.calidad} / ${op.estado}${op.marca ? ' · '+op.marca : ''}${op.origen === 'europa' ? ' · 🇪🇺' : ' · 🇺🇸'}${op.garantia ? '\n  → 🛡️ '+op.garantia : ''}\n  → ${fCRC(op.precioFinalCRC)}`;
+            return `• ${r.nombre}${r._np ? ' ['+r._np+']' : ''} (×${r.cantidad || 1})\n  → ${op.calidad} / ${op.estado}${op.marca ? ' · '+op.marca : ''}${op.origen === 'europa' ? ' · 🇪🇺' : ' · 🇺🇸'}${op.garantia ? '\n  → 🛡️ '+op.garantia : ''}\n  → ${fCRC(op.precioFinalCRC)}`;
           }).join('\n') +
           `\n\n💰 *Total aprobado: ${fCRC(total)}*\n💳 Adelanto requerido (50%): ${fCRC(Math.round(total * 0.5))}\n💵 Monto a pagar (${labelPago}): ${fCRC(montoPago)}\n🔧 Instalación: ${conInstalacion ? 'Sí, incluir instalación' : 'No'}\n\nAdelanto realizado: \nSaldo de repuestos: `;
 
@@ -546,7 +546,7 @@ function iniciar(payload) {
         const checklist = await clRes.json();
         for (const {r, oi} of aprobados) {
           const op = r.opciones[oi];
-          const itemName = `${r.nombre}${r._np ? ' ['+r._np+']' : ''} | ${op.calidad} / ${op.estado}${op.marca?' · '+op.marca:''} | ${fCRC(op.precioFinalCRC)}`;
+          const itemName = `${r.nombre}${r._np ? ' ['+r._np+']' : ''} (×${r.cantidad || 1}) | ${op.calidad} / ${op.estado}${op.marca?' · '+op.marca:''} | ${fCRC(op.precioFinalCRC)}`;
           await fetch(`https://api.trello.com/1/checklists/${checklist.id}/checkItems?key=${TK}&token=${TT}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -584,7 +584,7 @@ function iniciar(payload) {
     msg += `\n*Repuestos aprobados:*\n`;
     aprobados.forEach(({r, oi}) => {
       const op = r.opciones[oi];
-      msg += `• ${r.nombre}\n`;
+      msg += `• ${r.nombre}${r.cantidad > 1 ? ' (×' + r.cantidad + ')' : ''}\n`;
       msg += `  → ${op.calidad} / ${op.estado}${op.marca ? ' · ' + op.marca : ''}\n`;
       if (op.garantia) msg += `  → 🛡️ ${op.garantia}\n`;
       msg += `  → ${fCRC(op.precioFinalCRC)}\n`;
