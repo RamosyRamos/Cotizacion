@@ -122,9 +122,9 @@
       font-size: 11px; font-weight: 700; padding: 3px 10px;
       border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase;
     }
-    .tag-critico { background: rgba(204,0,0,0.18); color: #ff7777; border: 1px solid rgba(204,0,0,0.35); }
+    .tag-critico, .tag-cr\00EDtico { background: rgba(204,0,0,0.22); color: #ff6060; border: 1px solid rgba(204,0,0,0.45); }
     .tag-recomendado { background: rgba(245,158,11,0.18); color: #fbbf24; border: 1px solid rgba(245,158,11,0.35); }
-    .tag-opcional { background: rgba(120,120,120,0.18); color: #aaa; border: 1px solid rgba(120,120,120,0.3); }
+    .tag-opcional { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.35); }
 
     /* REPUESTO EN LISTA */
     .repuesto-item {
@@ -770,7 +770,6 @@ function editarRepuesto(i) {
   document.getElementById('f_cantidad').value = r.cantidad || 1;
   document.getElementById('f_prioridad').value= r.prioridad || 'Crítico';
   document.getElementById('f_peso').value     = r.pesoLb || '';
-  document.getElementById('f_transusd').value = r.transporteExternoUSD || 0;
   document.getElementById('f_nota').value     = r.nota || '';
 
   // Cambiar título
@@ -1627,7 +1626,6 @@ function renderModoCliente() {
       const aprobadosData = JSON.stringify(aprobados.map(x=>({
         n: x.r.nombre,
         np: x.r._np || '',
-        qty: x.r.cantidad || 1,
         op: x.r.opciones[x.oi].calidad+' · '+x.r.opciones[x.oi].estado+(x.r.opciones[x.oi].marca?' · '+x.r.opciones[x.oi].marca:''),
         precio: x.r.opciones[x.oi].precioFinalCRC
       }))).replace(/'/g,"\\'");
@@ -1684,7 +1682,7 @@ function renderModoCliente() {
 
       const cardName = `${nombre}${vehiculo ? ' — ' + vehiculo : ''}${orden ? ' · ' + orden : ''}`;
       const desc = `👤 ${nombre}\n🚗 ${vehiculo}\n📋 ${orden}\n\n💰 Total aprobado: ${fCRC(total)}\n\n*Repuestos aprobados:*\n` +
-        aprobados.map(a => `• ${a.n}${a.np?' ['+a.np+']':''}${a.qty > 1 ? ' (×'+a.qty+')' : ''}\n  → ${a.op}\n  → ${fCRC(a.precio)}`).join('\n');
+        aprobados.map(a => `• ${a.n}${a.np?' ['+a.np+']':''}\n  → ${a.op}\n  → ${fCRC(a.precio)}`).join('\n');
 
       const cardRes = await fetch(`https://api.trello.com/1/cards?key=${TK}&token=${TT}`, {
         method: 'POST',
@@ -1705,7 +1703,7 @@ function renderModoCliente() {
         await fetch(`https://api.trello.com/1/checklists/${checklist.id}/checkItems?key=${TK}&token=${TT}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: `${a.n}${a.np?' ['+a.np+']':''}${a.qty > 1 ? ' (×'+a.qty+')' : ''} | ${a.op} | ${fCRC(a.precio)}` })
+          body: JSON.stringify({ name: `${a.n}${a.np?' ['+a.np+']':''} | ${a.op} | ${fCRC(a.precio)}` })
         });
       }
 
@@ -1721,7 +1719,7 @@ function renderModoCliente() {
     msg += `🚗 Vehículo: ${vehiculo}\n\n`;
     msg += `*Repuestos aprobados:*\n`;
     aprobados.forEach(a => {
-      msg += `• ${a.n}${a.qty > 1 ? ' (×' + a.qty + ')' : ''}\n  → ${a.op}\n  → ${fCRC(a.precio)}\n`;
+      msg += `• ${a.n}\n  → ${a.op}\n  → ${fCRC(a.precio)}\n`;
     });
     msg += `\n💰 *Total aprobado: ${fCRC(total)}*\n`;
     msg += `\n_Enviado desde el formulario de aprobación Taller Ramos y Ramos_`;
