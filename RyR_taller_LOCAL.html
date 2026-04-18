@@ -1424,7 +1424,7 @@ async function crearTarjetaTrello(linkCotizacion, info) {
   // 4. Agregar cada repuesto como ítem
   for (const r of repuestos) {
     for (const op of r.opciones) {
-      const itemName = `${r.nombre}${r.nParte ? ' [' + r.nParte + ']' : ''} | ${op.calidad} / ${op.estado}${op.marca ? ' · ' + op.marca : ''} | ${fCRC(op.precioFinalCRC)}`;
+      const itemName = `${r.nombre}${r.nParte ? ' [' + r.nParte + ']' : ''}${r.cantidad > 1 ? ' (×' + r.cantidad + ')' : ''} | ${op.calidad} / ${op.estado}${op.marca ? ' · ' + op.marca : ''} | ${fCRC(op.precioFinalCRC)}`;
       await fetch(
         `https://api.trello.com/1/checklists/${checklist.id}/checkItems?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`, {
         method: 'POST',
@@ -1455,14 +1455,18 @@ async function generarLink() {
       prioridad: r.prioridad,
       nota: r.nota,
       _np: r.nParte || '',
-      origen: r.origen || 'usa',
+      pesoLb: r.pesoLb || 0,
       opciones: r.opciones.map(op => ({
         calidad: op.calidad,
         estado: op.estado,
         marca: op.marca,
         garantia: op.garantia,
-        origen: op.origen || 'europa',
+        origen: op.origen || 'usa',
+        precioUSD: op.precioUSD || 0,
+        transUSD: op.transUSD || 0,
+        tarifaUSD: op.tarifaUSD || 0,
         precioFinalCRC: op.precioFinalCRC,
+        desglose: op.desglose || {},
       }))
     }))
   };
@@ -1520,11 +1524,13 @@ async function enviarLinkATrello(url) {
       cliente: info,
       repuestos: repuestos.map(r => ({
         nombre: r.nombre, cantidad: r.cantidad, prioridad: r.prioridad,
-        nota: r.nota, _np: r.nParte || '', origen: r.origen || 'usa',
+        nota: r.nota, _np: r.nParte || '', pesoLb: r.pesoLb || 0,
         opciones: r.opciones.map(op => ({
           calidad: op.calidad, estado: op.estado, marca: op.marca,
-          garantia: op.garantia, origen: op.origen || 'europa',
-          precioFinalCRC: op.precioFinalCRC,
+          garantia: op.garantia, origen: op.origen || 'usa',
+          precioUSD: op.precioUSD || 0, transUSD: op.transUSD || 0,
+          tarifaUSD: op.tarifaUSD || 0, precioFinalCRC: op.precioFinalCRC,
+          desglose: op.desglose || {},
         }))
       }))
     };
@@ -1626,6 +1632,7 @@ function renderModoCliente() {
       const aprobadosData = JSON.stringify(aprobados.map(x=>({
         n: x.r.nombre,
         np: x.r._np || '',
+        qty: x.r.cantidad || 1,
         op: x.r.opciones[x.oi].calidad+' · '+x.r.opciones[x.oi].estado+(x.r.opciones[x.oi].marca?' · '+x.r.opciones[x.oi].marca:''),
         precio: x.r.opciones[x.oi].precioFinalCRC
       }))).replace(/'/g,"\\'");
@@ -1682,7 +1689,7 @@ function renderModoCliente() {
 
       const cardName = `${nombre}${vehiculo ? ' — ' + vehiculo : ''}${orden ? ' · ' + orden : ''}`;
       const desc = `👤 ${nombre}\n🚗 ${vehiculo}\n📋 ${orden}\n\n💰 Total aprobado: ${fCRC(total)}\n\n*Repuestos aprobados:*\n` +
-        aprobados.map(a => `• ${a.n}${a.np?' ['+a.np+']':''}\n  → ${a.op}\n  → ${fCRC(a.precio)}`).join('\n');
+        aprobados.map(a => `• ${a.n}${a.np?' ['+a.np+']':''}${a.qty > 1 ? ' (×'+a.qty+')' : ''}\n  → ${a.op}\n  → ${fCRC(a.precio)}`).join('\n');
 
       const cardRes = await fetch(`https://api.trello.com/1/cards?key=${TK}&token=${TT}`, {
         method: 'POST',
@@ -1703,7 +1710,7 @@ function renderModoCliente() {
         await fetch(`https://api.trello.com/1/checklists/${checklist.id}/checkItems?key=${TK}&token=${TT}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: `${a.n}${a.np?' ['+a.np+']':''} | ${a.op} | ${fCRC(a.precio)}` })
+          body: JSON.stringify({ name: `${a.n}${a.np?' ['+a.np+']':''}${a.qty > 1 ? ' (×'+a.qty+')' : ''} | ${a.op} | ${fCRC(a.precio)}` })
         });
       }
 
@@ -1719,7 +1726,7 @@ function renderModoCliente() {
     msg += `🚗 Vehículo: ${vehiculo}\n\n`;
     msg += `*Repuestos aprobados:*\n`;
     aprobados.forEach(a => {
-      msg += `• ${a.n}\n  → ${a.op}\n  → ${fCRC(a.precio)}\n`;
+      msg += `• ${a.n}${a.qty > 1 ? ' (×' + a.qty + ')' : ''}\n  → ${a.op}\n  → ${fCRC(a.precio)}\n`;
     });
     msg += `\n💰 *Total aprobado: ${fCRC(total)}*\n`;
     msg += `\n_Enviado desde el formulario de aprobación Taller Ramos y Ramos_`;
