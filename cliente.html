@@ -509,6 +509,9 @@ function iniciar(payload) {
     if (btn) btn.disabled = true;
     if (status) status.innerHTML = `<p style="color:var(--muted);font-size:13px;">⏳ Actualizando Trello...</p>`;
 
+    // ── Abrir ventana ANTES de cualquier await (necesario para iOS Safari) ──
+    const waWin = window.open('', '_blank');
+
     let trelloOk = false;
     try {
       const listsRes = await fetch(`https://api.trello.com/1/boards/${TB}/lists?key=${TK}&token=${TT}`);
@@ -519,7 +522,6 @@ function iniciar(payload) {
       if (!lista) throw new Error('No se encontró "Pendientes de pedir" en Trello');
 
       if (payload.trelloCardId) {
-        // Construir descripción con resumen de aprobados
         const desc = `✅ *Cliente aprobó la cotización*\n\n` +
           `👤 ${cliente.nombre}${cliente.vehiculo ? '\n🚗 ' + cliente.vehiculo : ''}${cliente.orden ? '\n📋 ' + cliente.orden : ''}\n\n` +
           `*Repuestos aprobados:*\n` +
@@ -529,7 +531,6 @@ function iniciar(payload) {
           }).join('\n') +
           `\n\n💰 *Total aprobado: ${fCRC(total)}*\n💳 Adelanto requerido (50%): ${fCRC(Math.round(total * 0.5))}\n💵 Monto a pagar (${labelPago}): ${fCRC(montoPago)}\n🔧 Instalación: ${conInstalacion ? 'Sí, incluir instalación' : 'No'}\n\nAdelanto realizado: \nSaldo de repuestos: `;
 
-        // Mover tarjeta y actualizar descripción
         const res = await fetch(`https://api.trello.com/1/cards/${payload.trelloCardId}?key=${TK}&token=${TT}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -537,7 +538,6 @@ function iniciar(payload) {
         });
         if (!res.ok) throw new Error('No se pudo mover la tarjeta');
 
-        // Agregar checklist con repuestos aprobados
         const clRes = await fetch(`https://api.trello.com/1/checklists?key=${TK}&token=${TT}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -554,7 +554,6 @@ function iniciar(payload) {
           });
         }
       } else {
-        // Fallback: crear tarjeta nueva
         const cardName = `${cliente.nombre}${cliente.vehiculo ? ' — ' + cliente.vehiculo : ''}${cliente.orden ? ' · ' + cliente.orden : ''}`;
         const cardRes = await fetch(`https://api.trello.com/1/cards?key=${TK}&token=${TT}`, {
           method: 'POST',
@@ -576,7 +575,7 @@ function iniciar(payload) {
       if (btn) btn.disabled = false;
     }
 
-    // Abrir WhatsApp
+    // Construir y enviar mensaje WhatsApp (la ventana ya estaba abierta antes del await)
     let msg = `✅ *Aprobación de cotización – Taller Ramos y Ramos*\n`;
     msg += `📋 N°: ${cliente.orden || '—'}\n`;
     msg += `👤 Cliente: ${cliente.nombre}\n`;
@@ -594,7 +593,11 @@ function iniciar(payload) {
     msg += `🔧 Instalación: ${conInstalacion ? 'Sí, incluir instalación' : 'No'}\n`;
     if (trelloOk) msg += `\n🗂️ Tarjeta actualizada en Trello ✅`;
     msg += `\n_Enviado desde el formulario de aprobación Taller Ramos y Ramos_`;
-    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    if (waWin) {
+      waWin.location.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+    } else {
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    }
   };
 
   render();
