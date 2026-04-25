@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -564,6 +564,46 @@ function iniciar(payload) {
       }
 
       trelloOk = true;
+
+      // Save to Supabase
+      try {
+        const SUPABASE_URL = 'https://lnsglpvobvfzbxpmyagc.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxuc2dscHZvYnZmemJ4cG15YWdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3OTI1MDMsImV4cCI6MjA1OTM2ODUwM30.5b3PVbGfIBnCsVDFJFuEbVkzYFtEFG60fk1sfeBRFOo';
+
+        const repuestosAprobados = aprobados.map(({r, oi}) => ({
+          nombre: r.nombre,
+          numero_parte: r._np || '',
+          cantidad: r.cantidad || 1,
+          calidad: r.opciones[oi].calidad,
+          estado: r.opciones[oi].estado,
+          origen: r.opciones[oi].origen || 'usa',
+          marca: r.opciones[oi].marca || '',
+          precio: r.opciones[oi].precioFinalCRC,
+          llegado: false
+        }));
+
+        await fetch(`${SUPABASE_URL}/rest/v1/cotizaciones`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            orden_id: payload?.cliente?.orden || payload?.orden || 'SIN-ORDEN',
+            cliente_nombre: payload?.cliente?.nombre || '',
+            cliente_vehiculo: payload?.cliente?.vehiculo || '',
+            cliente_nota: payload?.cliente?.nota || '',
+            repuestos: repuestosAprobados,
+            total_aprobado: total,
+            estado: 'aprobado'
+          })
+        });
+      } catch(e) {
+        console.warn('Supabase save failed (non-critical):', e);
+      }
+
       if (status) status.innerHTML = `
         <p style="color:#2ecc71;font-size:13px;margin-bottom:10px;">✅ ¡Selección confirmada!</p>
         <div style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.4);border-radius:10px;padding:14px;font-size:13px;color:#fbbf24;text-align:left;line-height:1.6;">
